@@ -8,7 +8,8 @@ const pretifyFilename = (imageUrl, pageUrl) => {
     const urlParts = (new URL(pageUrl.replace(/\/$/, ""))).pathname.split("/")
     console.debug("url parts", urlParts)
 
-    const fileName = imageUrl.split("/").pop()
+    const fileName = (new URL(imageUrl).pathname).split("/").pop()
+    console.debug("Cleaned filename", fileName)
     let [ name, ext ] = fileName.split(".")
     console.debug(`File name: ${name}.${ext}`)
 

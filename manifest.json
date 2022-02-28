@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Download Img",
     "version": "1.0",
-    "description": "Download all the things",
+    "description": "Extension to add item to context menu to enable downloading of hidden images",
     "icons": {
         "48": "icons/icon_48.png",
         "96": "icons/icon_96.png"
