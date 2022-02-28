@@ -1,7 +1,7 @@
 const MSG_CONTEXT_MENU_ON_IMAGE = "contextMenuOnImage"
 const MSG_DOWNLOAD_IMAGE = "downloadImage"
 
-const pretifyFilename = (imageUrl, pageUrl) => {
+const prettifyFilename = (imageUrl, pageUrl) => {
     // const { imageUrl, pageUrl } = imageData
     console.debug("Page url", pageUrl)
 
@@ -67,7 +67,7 @@ const initialise = () => {
                     type: MSG_CONTEXT_MENU_ON_IMAGE,
                     coords: {x, y},
                     imageUrl: imageAtContextMenu.src,
-                    prettyName: pretifyFilename(imageUrl, pageUrl),
+                    prettyName: prettifyFilename(imageUrl, pageUrl),
                 })
             } catch (e) { console.log(e) }
         }

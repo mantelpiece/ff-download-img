@@ -24,7 +24,7 @@ const downloadImageMenuItem = {
 
 const createContextItem = () => {
     try {
-        return browser.menus.create(
+        return browser.contextMenus.create(
             downloadImageMenuItem,
         )
     } catch (e) {
@@ -52,9 +52,9 @@ const initialise = () => {
                 }
                 console.debug({ ...lastImage, message: "Updating context menu"})
 
-                browser.menus
+                browser.contextMenus
                     .update(MENU_ID_DOWNLOAD_IMAGE, { title: `Download image as ${lastImage.prettyName}` })
-                    .then(() => browser.menus.refresh())
+                    .then(() => browser.contextMenus.refresh())
 
                 return Promise.resolve();
 
