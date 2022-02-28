@@ -1,0 +1,23 @@
+{
+    "manifest_version": 2,
+    "name": "Download Img",
+    "version": "1.0",
+    "description": "Download all the things",
+    "icons": {
+        "48": "icons/icon_48.png",
+        "96": "icons/icon_96.png"
+    },
+    "background": {
+        "scripts": [ "./background.js" ]
+    },
+    "content_scripts": [
+        { "matches": ["*://*/*"], "js": ["./content_page.js"] }
+    ],
+    "permissions": [
+        "activeTab",
+        "contextMenus",
+        "menus",
+        "downloads"
+    ]
+}
+
