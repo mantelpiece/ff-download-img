@@ -63,8 +63,7 @@ const handleContextMenu = (event) => {
             console.debug("Sending message", message)
             return browser.runtime
                 .sendMessage(message)
-                .then(e => console.debug(e))
-                .catch(e => console.error(e))
+                .then((res) => console.log(res))
 
         } catch (e) {
             return Promise.reject(e)

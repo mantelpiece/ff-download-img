@@ -52,32 +52,28 @@ const initialise = () => {
     const menuId = createContextItem()
     console.log("Created menu ", menuId)
 
-    browser.runtime.onMessage.addListener((data) => {
+    browser.runtime.onMessage.addListener((data, send, sendResponse) => {
         switch (data.type) {
             case MSG_CONTEXT_MENU_ON_IMAGE:
                 console.log("Dooo it")
                 return processContextMenuOnImage(lastImage, data)
                     .then((res) => { lastImage = res })
+                    .then(() => sendResponse("Okay"))
 
             case MSG_DOWNLOAD_IMAGE:
                 if (!lastImage) {
                     const message ="No image selected"
                     console.debug(message)
-                    return Promise.reject(message)
+                    return sendResponse(message)
                 }
 
                 console.log("Downloading image", lastImage)
-                try {
-                    return browser.downloads
-                        .download({
-                            filename: lastImage.prettyName,
-                            url: lastImage.imageUrl,
-                        })
-                        .catch(e => { console.log("whyyyyyy"); return e; })
-                } catch (e) {
-                    console.debug("Download cancelled")
-                    return Promise.reject(e)
-                }
+                return browser.downloads
+                    .download({
+                        filename: lastImage.prettyName,
+                        url: lastImage.imageUrl,
+                    })
+                    .then(() => {}, e => sendResponse(e))
 
             default:
                 console.debug(`Nope: ${data}`)
