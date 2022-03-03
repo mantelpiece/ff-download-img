@@ -31,36 +31,20 @@ const createContextItem = () => {
     }
 }
 
-const processContextMenuOnImage = (lastImage, data) => {
-    if (lastImage && lastImage.imageUrl === data.imageUrl) {
-        return Promise.resolve();
+const processContextMenuOnImage = (lastImage, newImage) => {
+    if (lastImage && lastImage.imageUrl === newImage.imageUrl) {
+        return Promise.resolve(lastImage);
     }
 
-    lastImage = {
-        ...data,
-    }
-    console.debug({ ...lastImage, message: "Updating context menu"})
+    console.debug({ ...newImage, message: "Updating context menu"})
 
     browser.contextMenus
-        .update(MENU_ID_DOWNLOAD_IMAGE, { title: `Download image as ${lastImage.prettyName}` })
+        .update(MENU_ID_DOWNLOAD_IMAGE, { title: `Download image as ${newImage.prettyName}` })
         .then(() => browser.contextMenus.refresh())
 
-    return Promise.resolve(lastImage);
+    return Promise.resolve(newImage);
 }
 
-const processDownloadImage = (lastImage) => {
-    console.log("last ", lastImage)
-    if (!lastImage) return Promise.reject("No image selected")
-
-    const { imageUrl: url, prettyName: filename } = lastImage
-
-    const downloading = browser.downloads.download({
-        filename,
-        url,
-    });
-
-    return downloading
-}
 
 const initialise = () => {
     let lastImage = null
@@ -71,11 +55,29 @@ const initialise = () => {
     browser.runtime.onMessage.addListener((data) => {
         switch (data.type) {
             case MSG_CONTEXT_MENU_ON_IMAGE:
+                console.log("Dooo it")
                 return processContextMenuOnImage(lastImage, data)
-                    .then((res) => lastImage = res)
+                    .then((res) => { lastImage = res })
 
             case MSG_DOWNLOAD_IMAGE:
-                return processDownloadImage(lastImage)
+                if (!lastImage) {
+                    const message ="No image selected"
+                    console.debug(message)
+                    return Promise.reject(message)
+                }
+
+                console.log("Downloading image", lastImage)
+                try {
+                    return browser.downloads
+                        .download({
+                            filename: lastImage.prettyName,
+                            url: lastImage.imageUrl,
+                        })
+                        .catch(e => { console.log("whyyyyyy"); return e; })
+                } catch (e) {
+                    console.debug("Download cancelled")
+                    return Promise.reject(e)
+                }
 
             default:
                 console.debug(`Nope: ${data}`)

@@ -1,6 +1,6 @@
 const MSG_CONTEXT_MENU_ON_IMAGE = "contextMenuOnImage"
 
-export const extractCollection = (url) => {
+const extractCollection = (url) => {
     const urlParts = (new URL(url)).pathname.replace(/\/$/, "").split("/")
     console.debug("url parts", urlParts)
 
@@ -20,8 +20,8 @@ export const extractCollection = (url) => {
     }
 };
 
-export const extractSimpleFilename = (imageUrl) => {
-    const fileName = (new URL(imageUrl).pathname).split("/").pop()
+const extractSimpleFilename = (url) => {
+    const fileName = (new URL(url).pathname).split("/").pop()
 
     // Default extension to jpg if the filename does not include one
     let [ basename, extension="jpg" ] = fileName.split(".")
@@ -36,32 +36,38 @@ export const extractSimpleFilename = (imageUrl) => {
 
 const handleContextMenu = (event) => {
     let { clientX: x, clientY: y } = event;
-    console.debug("Context menu click at coords", {x, y})
 
-    const elements = document.elementsFromPoint(x, y)
-    console.debug("# elements under cursor: ", elements.length)
+    const elementsUnderContext = document.elementsFromPoint(x, y)
+    const imageAtContextMenu = elementsUnderContext.find(el => el.tagName.toLowerCase() === "img")
 
-    let imageAtContextMenu = null
-    for (const el of elements) {
-        if (el.tagName.toLowerCase() === "img") {
-            imageAtContextMenu = el
-        }
-    }
 
-    if (imageAtContextMenu !== null) {
+    if (!imageAtContextMenu) {
+        // TODO: Send message to clear
+        console.debug("No image under cursor")
+    } else {
         console.debug("Image element under cursor", imageAtContextMenu)
         try {
-            const imageUrl = imageAtContextMenu.src
             const pageUrl = document.location.href
+            const imageUrl = imageAtContextMenu.src
 
-            browser.runtime.sendMessage({
+            const collection = extractCollection(pageUrl)
+            const simpleFilename = extractSimpleFilename(imageUrl)
+            const prettyName = collection !== "" ? `${collection}_${simpleFilename}` : simpleFilename
+
+            const message = {
                 type: MSG_CONTEXT_MENU_ON_IMAGE,
                 coords: {x, y},
                 imageUrl: imageAtContextMenu.src,
-                prettyName: prettifyFilename(imageUrl, pageUrl),
-            })
+                prettyName,
+            }
+            console.debug("Sending message", message)
+            return browser.runtime
+                .sendMessage(message)
+                .then(e => console.debug(e))
+                .catch(e => console.error(e))
+
         } catch (e) {
-            console.debug(e)
+            return Promise.reject(e)
         }
     }
 }
