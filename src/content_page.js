@@ -1,41 +1,36 @@
 const MSG_CONTEXT_MENU_ON_IMAGE = "contextMenuOnImage"
 
 export const extractCollection = (url) => {
-    const urlParts = (new URL(url.replace(/\/$/, ""))).pathname.split("/")
+    const urlParts = (new URL(url)).pathname.replace(/\/$/, "").split("/")
     console.debug("url parts", urlParts)
 
-    let namePrefix = ""
-    if (urlParts.length > 1) {
+    if (urlParts.length <= 1) {
+        return ""
+    } else {
         const page = urlParts.pop()
         console.debug("Page", page)
-        if (page !== "") {
-            const pageId = (page.match(/[0-9]+/) || []).pop()
-            if (pageId) {
-                namePrefix = `c${pageId.padStart(3, '0')}_`
-            } else {
-                namePrefix = `${page}_`
-            }
-            console.log("Name prefix", namePrefix)
+
+        const pageId = (page.match(/[0-9]+/) || []).pop()
+        console.debug("Page id", pageId)
+        if (pageId) {
+            return `c${pageId.padStart(3, '0')}`
+        } else {
+            return `${page}`
         }
     }
 };
 
-const prettifyFilename = (imageUrl, pageUrl) => {
-    // const { imageUrl, pageUrl } = imageData
-    console.debug("Page url", pageUrl)
-
+export const extractSimpleFilename = (imageUrl) => {
     const fileName = (new URL(imageUrl).pathname).split("/").pop()
-    console.debug("Cleaned filename", fileName)
-    let [ name, ext ] = fileName.split(".")
-    console.debug(`File name: ${name}.${ext}`)
 
+    // Default extension to jpg if the filename does not include one
+    let [ basename, extension="jpg" ] = fileName.split(".")
 
-
-    const numberMatch = name.match(/[0-9]+(.*[0-9]+)?/)
-    if (numberMatch) {
-        return `${namePrefix}${numberMatch[0].padStart(3, '0')}.${ext}`
+    const basenameId = (basename.match(/[0-9]+.*$/) || []).pop()
+    if (basenameId) {
+        return `${basenameId.padStart(3, '0')}.${extension}`
     } else {
-        return `${namePrefix}${fileName}`
+        return fileName
     }
 }
 

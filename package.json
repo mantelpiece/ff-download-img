@@ -1,7 +1,7 @@
 {
     "name": "download-img",
     "version": "1.0.0",
-    "main": "background.js",
+    "type": "module",
     "description": "",
     "homepage": "https://github.com/mantelpiece/ff-download-img#readme",
     "scripts": {
@@ -24,6 +24,7 @@
     },
     "jest": {
         "roots": ["<rootDir>/src"],
+        "testEnvironment": "jsdom",
         "testRegex": ".test.js$"
     }
 }
