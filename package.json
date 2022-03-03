@@ -1,0 +1,29 @@
+{
+    "name": "download-img",
+    "version": "1.0.0",
+    "main": "background.js",
+    "description": "",
+    "homepage": "https://github.com/mantelpiece/ff-download-img#readme",
+    "scripts": {
+        "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
+        "lint": "npx eslint src/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mantelpiece/ff-download-img.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/mantelpiece/ff-download-img/issues"
+    },
+    "devDependencies": {
+        "eslint": "^8.10.0",
+        "jest": "^27.5.1",
+        "web-ext": "^6.7.0"
+    },
+    "jest": {
+        "roots": ["<rootDir>/src"],
+        "testRegex": ".test.js$"
+    }
+}

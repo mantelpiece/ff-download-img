@@ -12,8 +12,6 @@ const downloadImageMenuItem = {
     },
     onclick(info, tab) {
         console.log("Downloading image under context menu")
-        const { pageUrl, targetElementId, frameId} = info;
-
         browser.tabs
             .executeScript(tab.id, {
                 frameId: info.frameId,
@@ -33,43 +31,51 @@ const createContextItem = () => {
     }
 }
 
+const processContextMenuOnImage = (lastImage, data) => {
+    if (lastImage && lastImage.imageUrl === data.imageUrl) {
+        return Promise.resolve();
+    }
+
+    lastImage = {
+        ...data,
+    }
+    console.debug({ ...lastImage, message: "Updating context menu"})
+
+    browser.contextMenus
+        .update(MENU_ID_DOWNLOAD_IMAGE, { title: `Download image as ${lastImage.prettyName}` })
+        .then(() => browser.contextMenus.refresh())
+
+    return Promise.resolve(lastImage);
+}
+
+const processDownloadImage = (lastImage) => {
+    console.log("last ", lastImage)
+    if (!lastImage) return Promise.reject("No image selected")
+
+    const { imageUrl: url, prettyName: filename } = lastImage
+
+    const downloading = browser.downloads.download({
+        filename,
+        url,
+    });
+
+    return downloading
+}
+
 const initialise = () => {
-    const lastContextMenuCoords = { x: 0, y: 0 }
     let lastImage = null
 
     const menuId = createContextItem()
     console.log("Created menu ", menuId)
 
-    browser.runtime.onMessage.addListener((data, sender) => {
+    browser.runtime.onMessage.addListener((data) => {
         switch (data.type) {
             case MSG_CONTEXT_MENU_ON_IMAGE:
-                if (lastImage && lastImage.imageUrl === data.imageUrl) {
-                    return Promise.resolve();
-                }
-
-                lastImage = {
-                    ...data,
-                }
-                console.debug({ ...lastImage, message: "Updating context menu"})
-
-                browser.contextMenus
-                    .update(MENU_ID_DOWNLOAD_IMAGE, { title: `Download image as ${lastImage.prettyName}` })
-                    .then(() => browser.contextMenus.refresh())
-
-                return Promise.resolve();
+                return processContextMenuOnImage(lastImage, data)
+                    .then((res) => lastImage = res)
 
             case MSG_DOWNLOAD_IMAGE:
-                console.log("last ", lastImage)
-                if (!lastImage) return Promise.reject("No image selected")
-
-                const { imageUrl: url, prettyName: filename } = lastImage
-
-                downloading = browser.downloads.download({
-                    filename,
-                    url,
-                });
-
-                return downloading
+                return processDownloadImage(lastImage)
 
             default:
                 console.debug(`Nope: ${data}`)
